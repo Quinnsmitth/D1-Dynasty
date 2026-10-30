@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b101d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="D1 Dynasty">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>D1 Dynasty – Build a D1 Wrestling Lineup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+
+<style>
+/* D1 Dynasty account + stats additions */
+.account-bar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:0 auto 18px;max-width:760px}
+.account-btn{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;letter-spacing:.06em;text-transform:uppercase;padding:10px 17px;border-radius:7px;border:1px solid var(--line,#29364d);background:var(--mat,#111a2b);color:var(--text,#f2f4f8);cursor:pointer}
+.account-btn.primary{background:var(--gold,#e4b84d);border-color:var(--gold,#e4b84d);color:#101522;font-weight:700}
+.account-btn:hover,.account-btn:focus-visible{filter:brightness(1.12);outline:2px solid var(--gold,#e4b84d);outline-offset:2px}
+.account-status{width:100%;text-align:center;color:var(--mute,#9aa7bd);font-size:.9rem;margin:0}
+.account-status strong{color:var(--text,#f2f4f8)}
+#accountModal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(3,7,15,.82);backdrop-filter:blur(5px)}
+#accountModal.open{display:flex}
+.account-panel{width:min(100%,440px);background:var(--card,#111a2b);border:1px solid var(--line,#29364d);border-top:3px solid var(--gold,#e4b84d);border-radius:12px;padding:24px;box-shadow:0 22px 70px #0008}
+.account-panel h2,.stats-head h2{font-family:'Bebas Neue',sans-serif;letter-spacing:.05em;font-size:2.2rem;margin:0 0 4px;color:var(--text,#f2f4f8)}
+.account-panel p{color:var(--mute,#9aa7bd);margin:0 0 18px}
+.account-panel label{display:block;font-size:.9rem;color:var(--mute,#9aa7bd);margin:13px 0 6px}
+.account-panel input{display:block;width:100%;box-sizing:border-box;border:1px solid var(--line,#29364d);border-radius:7px;background:var(--bg,#0b101d);color:var(--text,#f2f4f8);padding:12px;font:inherit}
+.account-panel input:focus{outline:2px solid var(--gold,#e4b84d);border-color:transparent}
+.account-actions{display:flex;gap:9px;margin-top:18px}.account-actions button{flex:1}
+.account-error{min-height:1.3em;color:#ff8e85!important;font-size:.9rem;margin:12px 0 0!important}
+.account-switch{display:flex;justify-content:space-between;gap:12px;margin-top:12px;font-size:.9rem}
+.account-switch button{border:0;background:none;color:var(--gold,#e4b84d);text-decoration:underline;cursor:pointer;font:inherit}
+.stats-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:0 0 18px}
+.stats-head p{color:var(--mute,#9aa7bd);margin:4px 0 0}
+.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0 24px}
+.stat-tile{background:var(--mat,#111a2b);border:1px solid var(--line,#29364d);border-radius:9px;padding:15px;min-width:0}
+.stat-tile span{display:block;color:var(--mute,#9aa7bd);font-size:.82rem;text-transform:uppercase;letter-spacing:.07em}
+.stat-tile b{display:block;font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1.1;margin-top:5px;color:var(--text,#f2f4f8)}
+.stats-section-title{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:1.25rem;margin:22px 0 10px}
+.stats-table-wrap{overflow-x:auto}.stats-table{width:100%;border-collapse:collapse;min-width:540px}.stats-table th,.stats-table td{padding:12px 10px;border-bottom:1px solid var(--line,#29364d);text-align:left}.stats-table th{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;color:var(--mute,#9aa7bd);font-size:.9rem}.stats-table td{font-size:.95rem}.stats-empty{padding:26px;text-align:center;border:1px dashed var(--line,#29364d);border-radius:9px;color:var(--mute,#9aa7bd)}
+.stats-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+@media(max-width:620px){.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.account-panel{padding:20px}.stats-head .account-btn{width:100%}}
+</style>
+
+</head>
+<body>
+<div id="app">
+
+<section id="home" class="screen on">
+  <div class="brand">
+    <div class="kicker">NCAA Division I · 2000 – 2026</div>
+    <h1>D1 <span>DYNASTY</span></h1>
+    <p>Ten real team lineups. One pick from each. Build the ultimate 10-man team, then see how many NCAA team points it scores and what grade it earns.</p>
+  </div>
+  <div class="account-bar" aria-label="Account and stats">
+    <button class="account-btn primary" id="accountOpen">Log in / Sign up</button>
+    <button class="account-btn" id="statsOpen">My stats</button>
+    <p class="account-status" id="accountStatus">Sign in to save your drafts and track your dynasty.</p>
+  </div>
+  <div class="card">
+    <div class="how">
+      <div><b>1. See a roster</b>A real team's NCAA lineup, one wrestler per weight. Season stats show where sourced; his finish stays hidden.</div>
+      <div><b>2. Pick one</b>Take one wrestler. That fills his weight, and his NCAA finish that year is revealed on your lineup board.</div>
+      <div><b>3. Compete</b>After 10 rosters you have a 10-man team, graded on its NCAA team points.</div>
+    </div>
+    <div class="label">Play</div>
+    <div class="chips" id="playChips"></div>
+    <p class="note" id="playNote" style="margin:6px 0 12px"></p>
+    <div id="diffWrap"><div class="label">Difficulty</div>
+    <div class="chips" id="modeChips"></div>
+    <p class="note" id="modeNote" style="margin:6px 0 12px"></p></div>
+    <div id="eraWrap"><div class="label">Era</div>
+    <div class="chips" id="eraChips"></div></div>
+    <p class="note" id="poolNote" style="margin:10px 0 16px"></p>
+    <div id="dailyDone" class="dailydone" style="display:none"></div>
+    <button class="btn" id="start">Start the draft</button>
+    <div class="best" id="best"></div>
+  </div>
+  <p class="note">Each draft deals you 10 random team-seasons, one at a time, and you can take any wrestler whose weight is still open. Lineups and finishes come from published NCAA brackets and results; a weight shows "No entry" when the team's starter could not be confirmed. Advancement and bonus points are typical values for each finish.</p>
+</section>
+
+<section id="draft" class="screen">
+  <div class="top">
+    <span class="pill">Roster <b id="pickN">1</b>/<span id="pickT">10</span></span><button class="pill" id="reroll" style="cursor:pointer;border:1px solid var(--line);background:var(--mat);color:inherit">Re-roll <b id="rrN">2</b></button>
+    <span class="pill" id="eraPill"></span>
+    <button class="pill" id="quit" style="cursor:pointer;border:1px solid var(--line);background:var(--mat);color:inherit">Menu</button>
+  </div>
+  <div class="label">Your lineup</div>
+  <div class="board" id="board"></div>
+  <div class="draw" id="draw"><div class="dl2">Drawing next team…</div><div class="dn" id="drawName">&nbsp;</div><div class="dbar"><i id="drawBar"></i></div></div>
+  <div class="rhead" id="rhead"></div>
+  <div class="roster" id="roster"></div>
+  <p class="legend" id="legend">Medium and Easy modes show season wins, pins and bonus % (a dash means no stats were found). Easy mode also shows each wrestler's NCAA finish; otherwise it is revealed after you pick him.</p>
+</section>
+
+<section id="results" class="screen">
+  <div class="card hero">
+    <div class="rank" id="rLabel"></div>
+    <h2 id="rTitle"></h2>
+    <div class="gradewrap"><div class="grade" id="rGrade"></div><span id="gradeNote">Team grade · NCAA team points from your 10 wrestlers' finishes</span></div>
+    <p class="note" id="rCoach" style="margin:8px 0 0;display:none"></p>
+    <div class="kpis">
+      <div class="kpi"><b id="kScore"></b><span>Team score</span></div>
+      <div class="kpi"><b id="kAA"></b><span id="kAAl">All-Americans</span></div>
+    </div>
+    <div class="sec" id="rAcc" style="display:none"><div class="label">Draft accuracy</div><div class="acc"><b id="accBig"></b><span id="accSub"></span></div><details class="best-l"><summary>See the best possible lineup</summary><div id="bestList"></div></details></div>
+    <div class="sec"><div class="label" id="rSecLabel">NCAA Championships</div>
+      <p class="note" id="rPtsNote" style="margin:0 0 8px">Points = NCAA placement points plus the typical advancement and bonus points for that finish.</p><table><thead><tr><th>Wt</th><th>Wrestler</th><th>Finish</th><th style="text-align:right">Pts</th></tr></thead><tbody id="tbody"></tbody></table></div>
+    <div class="btns"><button class="btn" id="again">New draft</button><button class="btn ghost" id="menu">Menu</button></div>
+    <div class="btns" style="margin-top:8px"><button class="btn ghost" id="copy" style="font-size:1.1rem">Copy my lineup</button></div>
+  </div>
+</section>
+
+<section id="stats" class="screen">
+  <div class="card">
+    <div class="stats-head">
+      <div><div class="kicker">Your record · Your dynasty</div><h2>CAREER STATS</h2><p id="statsSubtitle">Sign in to see your saved draft history.</p></div>
+      <button class="account-btn" id="statsBack">Back to menu</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-tile"><span>Drafts played</span><b id="statDrafts">—</b></div>
+      <div class="stat-tile"><span>Average score</span><b id="statAverage">—</b></div>
+      <div class="stat-tile"><span>Best score</span><b id="statBest">—</b></div>
+      <div class="stat-tile"><span>Best grade</span><b id="statGrade">—</b></div>
+    </div>
+    <div class="stats-section-title">Recent drafts</div>
+    <div id="statsHistory" class="stats-empty">Log in to load your personal stats.</div>
+    <div class="stats-actions"><button class="account-btn primary" id="statsRefresh">Refresh stats</button><button class="account-btn" id="accountLogout" style="display:none">Log out</button></div>
+  </div>
+</section>
+</div>
+
+<div id="accountModal" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+  <div class="account-panel">
+    <h2 id="accountTitle">YOUR DYNASTY</h2>
+    <p id="accountDescription">Log in to save your draft history and stats.</p>
+    <form id="accountForm">
+      <label for="accountEmail">Email</label><input id="accountEmail" type="email" autocomplete="email" required>
+      <label for="accountPassword">Password</label><input id="accountPassword" type="password" autocomplete="current-password" minlength="6" required>
+      <div class="account-actions"><button class="account-btn primary" id="accountSubmit" type="submit">Log in</button><button class="account-btn" id="accountCancel" type="button">Cancel</button></div>
+      <p class="account-error" id="accountError" role="status" aria-live="polite"></p>
+    </form>
+    <div class="account-switch"><span id="accountSwitchText">New here?</span><button id="accountSwitch" type="button">Create account</button></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+<!-- Firebase Configuration -->
+<script src="js/firebase.js"></script>
+<script src="js/data/ncaa-teams.js"></script>
+<script src="js/data/worlds-teams.js"></script>
+<script src="js/data/coaches.js"></script>
+<script src="js/data/stats.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cards.js"></script>
+<script src="js/state.js"></script>
+<script src="js/feasibility.js"></script>
+<script src="js/home.js"></script>
+<script src="js/daily.js"></script>
+<script src="js/draft.js"></script>
+<script src="js/simulation.js"></script>
+<script src="js/results.js"></script>
+<script src="js/auth-stats.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
